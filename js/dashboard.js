@@ -4,23 +4,101 @@ const ROLE_LABELS = {
   school: "School",
 };
 
+const MENU_ICON_SVG = {
+  "layout-dashboard":
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>',
+  users:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><path d="M20 8v6"></path><path d="M23 11h-6"></path></svg>',
+  "file-spreadsheet":
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M8 13h8"></path><path d="M8 17h2"></path><path d="M12 17h2"></path><path d="M16 17h0"></path></svg>',
+  school:
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l7-4 7 4v14"></path><path d="M9 9h.01"></path><path d="M12 9h.01"></path><path d="M15 9h.01"></path><path d="M9 13h.01"></path><path d="M12 13h.01"></path><path d="M15 13h.01"></path><path d="M11 21v-4h2v4"></path></svg>',
+  "clipboard-check":
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>',
+  "building-2":
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V7l7-4 7 4v14"></path><path d="M9 9h.01"></path><path d="M12 9h.01"></path><path d="M15 9h.01"></path><path d="M9 13h.01"></path><path d="M12 13h.01"></path><path d="M15 13h.01"></path><path d="M11 21v-4h2v4"></path></svg>',
+  "upload-cloud":
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="M12 18v-6"></path><path d="m9.5 14.5 2.5-2.5 2.5 2.5"></path></svg>',
+  "chevrons-left":
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 17-5-5 5-5"></path><path d="m18 17-5-5 5-5"></path></svg>',
+  "chevrons-right":
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 17 5-5-5-5"></path><path d="m13 17 5-5-5-5"></path></svg>',
+  "log-out":
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg>',
+};
+
+function getMenuIconSvg(iconKey) {
+  return MENU_ICON_SVG[iconKey] ||
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle></svg>';
+}
+
+function hasLucideRuntime() {
+  return typeof window !== "undefined" && window.lucide && typeof window.lucide.createIcons === "function";
+}
+
+function renderLucideIcons() {
+  if (!hasLucideRuntime()) {
+    return;
+  }
+
+  window.lucide.createIcons({
+    attrs: {
+      width: "18",
+      height: "18",
+      "stroke-width": "2",
+    },
+  });
+}
+
+function renderIconElement(container, iconName) {
+  if (hasLucideRuntime()) {
+    container.innerHTML = `<i data-lucide="${iconName}"></i>`;
+    return;
+  }
+
+  container.innerHTML = getMenuIconSvg(iconName);
+}
+
+function setSidebarToggleIcon(isCollapsed) {
+  const toggleButton = document.getElementById("toggle-sidebar");
+  const toggleIcon = document.getElementById("toggle-icon");
+  if (!toggleButton || !toggleIcon) {
+    return;
+  }
+
+  const iconName = isCollapsed ? "chevrons-right" : "chevrons-left";
+  renderIconElement(toggleIcon, iconName);
+  toggleButton.title = isCollapsed ? "ขยายเมนู" : "ยุบเมนู";
+  toggleButton.setAttribute("aria-label", isCollapsed ? "ขยายเมนู" : "ยุบเมนู");
+  renderLucideIcons();
+}
+
+function renderSidebarUtilityIcons() {
+  const logoutIcon = document.querySelector("#logout-btn .icon");
+  if (logoutIcon) {
+    renderIconElement(logoutIcon, "log-out");
+  }
+
+  renderLucideIcons();
+}
+
 const MENU_BY_ROLE = {
   admin: [
-    { label: "Dashboard", page: "dashboard" },
-    { label: "จัดการผู้ใช้งาน", page: "users" },
-    { label: "Import CSV", page: "import" },
-    { label: "รายชื่อโรงเรียน", page: "schools" },
-    { label: "สถานะการส่งงาน", page: "submissions" },
+    { label: "Dashboard", page: "dashboard", icon: "layout-dashboard" },
+    { label: "จัดการผู้ใช้งาน", page: "users", icon: "users" },
+    { label: "Import CSV", page: "import", icon: "file-spreadsheet" },
+    { label: "รายชื่อโรงเรียน", page: "schools", icon: "school" },
+    { label: "สถานะการส่งงาน", page: "submissions", icon: "clipboard-check" },
   ],
   staff: [
-    { label: "Dashboard", page: "dashboard" },
-    { label: "รายชื่อโรงเรียน", page: "schools" },
-    { label: "สถานะการส่งงาน", page: "submissions" },
+    { label: "Dashboard", page: "dashboard", icon: "layout-dashboard" },
+    { label: "รายชื่อโรงเรียน", page: "schools", icon: "school" },
+    { label: "สถานะการส่งงาน", page: "submissions", icon: "clipboard-check" },
   ],
   school: [
-    { label: "ข้อมูลโรงเรียน", page: "school-info" },
-    { label: "ส่งงานหลักสูตร", page: "curriculum-submit" },
-    { label: "สถานะการส่งงาน", page: "submissions" },
+    { label: "ข้อมูลโรงเรียน", page: "school-info", icon: "building-2" },
+    { label: "ส่งงานหลักสูตร", page: "curriculum-submit", icon: "upload-cloud" },
+    { label: "สถานะการส่งงาน", page: "submissions", icon: "clipboard-check" },
   ],
 };
 
@@ -461,10 +539,13 @@ function createMenuItem(item) {
   button.type = "button";
   button.className = "menu-item w-full text-left rounded-lg px-3 py-2.5 text-sm text-slate-200 hover:bg-slate-800 transition-colors flex items-center";
   button.dataset.page = item.page;
+  button.title = item.label;
+  button.setAttribute("aria-label", item.label);
 
   const icon = document.createElement("span");
-  icon.className = "icon mr-2";
-  icon.textContent = "•";
+  icon.className = "icon";
+  icon.setAttribute("aria-hidden", "true");
+  renderIconElement(icon, item.icon);
 
   const label = document.createElement("span");
   label.className = "label";
@@ -488,6 +569,8 @@ function renderMenu(role) {
   items.forEach((item) => {
     menuList.appendChild(createMenuItem(item));
   });
+
+  renderLucideIcons();
 
   currentPage = getDefaultPageForRole(role);
 }
@@ -3110,14 +3193,14 @@ function fillProfile(user) {
 function setupSidebarToggle() {
   const sidebar = document.getElementById("sidebar");
   const toggleButton = document.getElementById("toggle-sidebar");
-  const toggleIcon = document.getElementById("toggle-icon");
 
   let isCollapsed = false;
+  setSidebarToggleIcon(isCollapsed);
 
   toggleButton.addEventListener("click", () => {
     isCollapsed = !isCollapsed;
     sidebar.classList.toggle("is-collapsed", isCollapsed);
-    toggleIcon.textContent = isCollapsed ? "⟩⟩" : "⟨⟨";
+    setSidebarToggleIcon(isCollapsed);
   });
 }
 
@@ -3139,9 +3222,11 @@ function initDashboard() {
 
   currentUser = user;
   fillProfile(user);
+  renderSidebarUtilityIcons();
   renderMenu(user.role);
   navigateToPage(currentPage);
   setupSidebarToggle();
+  renderLucideIcons();
   setupLogout();
 }
 

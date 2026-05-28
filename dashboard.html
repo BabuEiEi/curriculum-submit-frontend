@@ -38,10 +38,29 @@
 
       .sidebar.is-collapsed .menu-item {
         justify-content: center;
+        gap: 0;
       }
 
       .sidebar.is-collapsed .menu-item .icon {
         margin-right: 0;
+      }
+
+      .menu-item {
+        gap: 0.75rem;
+      }
+
+      .menu-item .icon {
+        width: 20px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .menu-item .icon svg {
+        width: 18px;
+        height: 18px;
       }
 
       .content-area {
@@ -70,8 +89,9 @@
             type="button"
             class="h-9 w-9 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors flex items-center justify-center"
             aria-label="ยุบหรือขยายเมนู"
+            title="ยุบเมนู"
           >
-            <span id="toggle-icon">⟨⟨</span>
+            <span id="toggle-icon" class="icon" aria-hidden="true"></span>
           </button>
         </div>
 
@@ -88,8 +108,10 @@
             id="logout-btn"
             type="button"
             class="menu-item w-full rounded-lg bg-rose-600 hover:bg-rose-700 transition-colors text-sm font-medium px-3 py-2.5 flex items-center"
+            title="Logout"
+            aria-label="Logout"
           >
-            <span class="icon mr-2">⎋</span>
+            <span class="icon" aria-hidden="true"><i data-lucide="log-out"></i></span>
             <span class="label">Logout</span>
           </button>
         </div>
@@ -115,5 +137,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/dashboard.js"></script>
+    <script
+      src="https://unpkg.com/lucide@latest"
+      defer
+      onload="window.renderLucideIcons && window.renderLucideIcons()"
+    ></script>
   </body>
 </html>

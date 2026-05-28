@@ -1,4 +1,5 @@
 const SESSION_TIMEOUT_MS = 8 * 60 * 60 * 1000;
+const LOGIN_REQUEST_TIMEOUT_MS = 15000;
 
 async function login(event) {
     event.preventDefault();
@@ -19,6 +20,8 @@ async function login(event) {
 
     loginBtn.disabled = true;
     loginBtn.textContent = "กำลังเข้าสู่ระบบ...";
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), LOGIN_REQUEST_TIMEOUT_MS);
 
     try {
         const payload = {
@@ -34,6 +37,7 @@ async function login(event) {
             method: "POST",
             // ไม่กำหนด Content-Type เพื่อหลีกเลี่ยง CORS preflight (OPTIONS)
             body: JSON.stringify(payload),
+            signal: controller.signal,
         });
 
         const rawText = await response.text();
@@ -106,9 +110,14 @@ async function login(event) {
 
         window.location.href = "dashboard.html";
     } catch (error) {
-        alertBox.textContent = error.message || "ไม่สามารถเชื่อมต่อระบบได้";
+        if (error && error.name === "AbortError") {
+            alertBox.textContent = "การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง";
+        } else {
+            alertBox.textContent = error.message || "ไม่สามารถเชื่อมต่อระบบได้";
+        }
         alertBox.classList.add("error");
     } finally {
+        clearTimeout(timeoutId);
         loginBtn.disabled = false;
         loginBtn.textContent = "เข้าสู่ระบบ";
     }

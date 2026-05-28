@@ -76,15 +76,17 @@ async function login(event) {
         const areaService =
             userData.areaService ||
             userData.area_service ||
+            result.areaService ||
+            result.area_service ||
+            "ไม่ระบุหน่วยงาน";
+        const schoolName =
             userData.school ||
             userData.schoolName ||
             userData.school_name ||
-            result.areaService ||
-            result.area_service ||
             result.school ||
             result.schoolName ||
             result.school_name ||
-            "ไม่ระบุหน่วยงาน";
+            "";
 
         if (!userCode) {
             throw new Error("ไม่พบรหัสผู้ใช้งานจากระบบ");
@@ -94,7 +96,7 @@ async function login(event) {
         localStorage.setItem("name", String(name));
         localStorage.setItem("role", String(role));
         localStorage.setItem("areaService", String(areaService));
-        localStorage.setItem("school", String(areaService));
+        localStorage.setItem("school", String(schoolName || areaService));
         const loginAt = Date.now();
         localStorage.setItem("loginAt", String(loginAt));
         localStorage.setItem("expiresAt", String(loginAt + SESSION_TIMEOUT_MS));

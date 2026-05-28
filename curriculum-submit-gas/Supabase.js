@@ -60,6 +60,120 @@ function upsertSupabase(endpoint, payload) {
   return JSON.parse(text);
 }
 
+function sanitizeAuditMetadata(metadata) {
+  const blockedKeys = {
+    password: true,
+    passwordhash: true,
+    password_hash: true,
+    filebase64: true,
+    base64: true,
+    earlyfile: true,
+    lowerfile: true,
+    upperfile: true,
+    token: true,
+    key: true,
+    supabasekey: true
+  };
+
+  function sanitizeValue(value) {
+    if (value === null || value === undefined) {
+      return value;
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(sanitizeValue);
+    }
+
+    if (typeof value === "object") {
+      const sanitized = {};
+      const keys = Object.keys(value);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const normalizedKey = String(key || "").replace(/[^a-zA-Z0-9_]/g, "").toLowerCase();
+        if (blockedKeys[normalizedKey]) {
+          sanitized[key] = "[REDACTED]";
+          continue;
+        }
+        sanitized[key] = sanitizeValue(value[key]);
+      }
+      return sanitized;
+    }
+
+    return value;
+  }
+
+  if (!metadata || typeof metadata !== "object") {
+    return {};
+  }
+
+  return sanitizeValue(metadata);
+}
+
+function deriveAuditTarget(action, data) {
+  const currentAction = String(action || "").trim();
+  const source = data && typeof data === "object" ? data : {};
+
+  let targetUserCode = "";
+  if (source.targetUserCode) {
+    targetUserCode = String(source.targetUserCode || "").trim();
+  } else if (source.userCode) {
+    targetUserCode = String(source.userCode || "").trim();
+  } else if (source.schoolCode) {
+    targetUserCode = String(source.schoolCode || "").trim();
+  } else if (source.id) {
+    targetUserCode = String(source.id || "").trim();
+  }
+
+  let targetRole = "";
+  if (currentAction === "createUser" || currentAction === "updateUser") {
+    targetRole = normalizeRole(source.role || source.targetRole || "") || "";
+  }
+
+  return {
+    targetUserCode: targetUserCode || null,
+    targetRole: targetRole || null
+  };
+}
+
+function buildAuditPayload(context) {
+  const current = context && typeof context === "object" ? context : {};
+  const target = deriveAuditTarget(current.action, current.data || {});
+
+  const actorUserCode = String(current.actorUserCode || current.requesterUserCode || "").trim();
+  const actorRole = normalizeRole(current.actorRole || current.requesterRole || "") || null;
+  const message = String(current.message || "").trim();
+  const errorCode = String(current.errorCode || "").trim();
+  const metadata = sanitizeAuditMetadata(current.metadata || {});
+
+  return {
+    request_id: String(current.requestId || "").trim() || null,
+    action: String(current.action || "").trim() || "unknown",
+    status: String(current.status || "").trim() || "UNKNOWN",
+    actor_user_code: actorUserCode || null,
+    actor_role: actorRole,
+    target_user_code: current.targetUserCode || target.targetUserCode,
+    target_role: current.targetRole || target.targetRole,
+    message: message || null,
+    error_code: errorCode || null,
+    metadata: metadata,
+    ip: String(current.ip || "").trim() || null,
+    user_agent: String(current.userAgent || "").trim() || null
+  };
+}
+
+function writeAuditLog(payload) {
+  return callSupabase("audit_logs", "POST", payload);
+}
+
+function safeAuditLog(payload) {
+  try {
+    return writeAuditLog(payload);
+  } catch (error) {
+    Logger.log("[AUDIT_LOG_ERROR] " + error.toString());
+    return null;
+  }
+}
+
 function normalizeRole(roleValue) {
   const role = String(roleValue || "").trim().toLowerCase();
   return ["admin", "staff", "school"].indexOf(role) !== -1 ? role : "";

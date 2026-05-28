@@ -9,9 +9,86 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  const requestId = Utilities.getUuid();
+  let action = "unknown";
+  let data = {};
+
+  function sanitizeActionMetadata(currentAction, payload) {
+    const source = payload && typeof payload === "object" ? payload : {};
+
+    if (currentAction === "login") {
+      return {
+        username: String(source.username || "").trim() || null
+      };
+    }
+
+    if (currentAction === "importUsers") {
+      return {
+        usersCount: Array.isArray(source.users) ? source.users.length : 0
+      };
+    }
+
+    if (currentAction === "uploadSubmission") {
+      const files = source.files && typeof source.files === "object" ? source.files : {};
+      return {
+        uploadUserCode: String(source.userCode || "").trim() || null,
+        hasEarly: Boolean(files.early && files.early.base64),
+        hasLower: Boolean(files.lower && files.lower.base64),
+        hasUpper: Boolean(files.upper && files.upper.base64)
+      };
+    }
+
+    if (currentAction === "getSchoolProfile" || currentAction === "updateSchoolProfile") {
+      return {
+        schoolUserCode: String(source.userCode || source.requesterUserCode || "").trim() || null
+      };
+    }
+
+    return {
+      targetUserCode: String(source.userCode || source.targetUserCode || source.schoolCode || "").trim() || null
+    };
+  }
+
+  function resolveStatus(currentAction, result) {
+    if (result && typeof result === "object" && result.success === false) {
+      const message = String(result.message || "").trim();
+      if (currentAction === "login") {
+        return "FAILED";
+      }
+      if (message.indexOf("ไม่มีสิทธิ์") !== -1) {
+        return "DENIED";
+      }
+      return "FAILED";
+    }
+
+    return "SUCCESS";
+  }
+
+  function auditAndRespond(result, options) {
+    const extra = options && typeof options === "object" ? options : {};
+    const actorUserCode = extra.actorUserCode || data.requesterUserCode || data.username || data.userCode || "";
+    const actorRole = extra.actorRole || data.requesterRole || "";
+    const target = deriveAuditTarget(action, data || {});
+
+    safeAuditLog(buildAuditPayload({
+      requestId: requestId,
+      action: action,
+      status: extra.status || resolveStatus(action, result),
+      actorUserCode: String(actorUserCode || "").trim() || null,
+      actorRole: String(actorRole || "").trim().toLowerCase() || null,
+      targetUserCode: extra.targetUserCode || target.targetUserCode || null,
+      targetRole: extra.targetRole || target.targetRole || null,
+      message: result && result.message ? result.message : (extra.message || ""),
+      errorCode: extra.errorCode || null,
+      metadata: Object.assign({}, sanitizeActionMetadata(action, data || {}), extra.metadata || {})
+    }));
+
+    return jsonResponse(result);
+  }
+
   try {
-    const data = JSON.parse(e.postData.contents);
-    const action = data.action;
+    data = JSON.parse(e.postData.contents);
+    action = String(data.action || "").trim() || "unknown";
     const adminOnlyActions = ["getUsers", "createUser", "updateUser", "deleteUser", "importUsers"];
     const adminStaffActions = ["getSchools", "getDashboardStats"];
 
@@ -22,36 +99,74 @@ function doPost(e) {
     } else if (action === "getSchoolProfile") {
       const authResult = requireAuth(data);
       if (!authResult.success) {
-        return jsonResponse(authResult);
+        return auditAndRespond(authResult, {
+          status: "DENIED",
+          message: authResult.message,
+          metadata: { stage: "requireAuth" }
+        });
       }
 
       const roleResult = requireRole(authResult, ["admin", "staff", "school"]);
       if (!roleResult.success) {
-        return jsonResponse(roleResult);
+        return auditAndRespond(roleResult, {
+          status: "DENIED",
+          actorUserCode: authResult.requester && authResult.requester.userCode,
+          actorRole: authResult.requester && authResult.requester.role,
+          message: roleResult.message,
+          metadata: { stage: "requireRole" }
+        });
       }
 
       result = getSchoolProfile(data, authResult.requester);
+      return auditAndRespond(result, {
+        actorUserCode: authResult.requester && authResult.requester.userCode,
+        actorRole: authResult.requester && authResult.requester.role
+      });
     } else if (action === "updateSchoolProfile") {
       const authResult = requireAuth(data);
       if (!authResult.success) {
-        return jsonResponse(authResult);
+        return auditAndRespond(authResult, {
+          status: "DENIED",
+          message: authResult.message,
+          metadata: { stage: "requireAuth" }
+        });
       }
 
       const roleResult = requireRole(authResult, ["admin", "school"]);
       if (!roleResult.success) {
-        return jsonResponse(roleResult);
+        return auditAndRespond(roleResult, {
+          status: "DENIED",
+          actorUserCode: authResult.requester && authResult.requester.userCode,
+          actorRole: authResult.requester && authResult.requester.role,
+          message: roleResult.message,
+          metadata: { stage: "requireRole" }
+        });
       }
 
       result = updateSchoolProfile(data, authResult.requester);
+      return auditAndRespond(result, {
+        actorUserCode: authResult.requester && authResult.requester.userCode,
+        actorRole: authResult.requester && authResult.requester.role
+      });
     } else if (adminOnlyActions.indexOf(action) !== -1) {
       const authResult = requireAuth(data);
       if (!authResult.success) {
-        return jsonResponse(authResult);
+        return auditAndRespond(authResult, {
+          status: "DENIED",
+          message: authResult.message,
+          metadata: { stage: "requireAuth" }
+        });
       }
 
       const roleResult = requireRole(authResult, ["admin"]);
       if (!roleResult.success) {
-        return jsonResponse(roleResult);
+        return auditAndRespond(roleResult, {
+          status: "DENIED",
+          actorUserCode: authResult.requester && authResult.requester.userCode,
+          actorRole: authResult.requester && authResult.requester.role,
+          message: roleResult.message,
+          metadata: { stage: "requireRole" }
+        });
       }
 
       if (action === "getUsers") {
@@ -65,15 +180,29 @@ function doPost(e) {
       } else if (action === "importUsers") {
         result = importUsers(data);
       }
+      return auditAndRespond(result, {
+        actorUserCode: authResult.requester && authResult.requester.userCode,
+        actorRole: authResult.requester && authResult.requester.role
+      });
     } else if (adminStaffActions.indexOf(action) !== -1) {
       const authResult = requireAuth(data);
       if (!authResult.success) {
-        return jsonResponse(authResult);
+        return auditAndRespond(authResult, {
+          status: "DENIED",
+          message: authResult.message,
+          metadata: { stage: "requireAuth" }
+        });
       }
 
       const roleResult = requireRole(authResult, ["admin", "staff"]);
       if (!roleResult.success) {
-        return jsonResponse(roleResult);
+        return auditAndRespond(roleResult, {
+          status: "DENIED",
+          actorUserCode: authResult.requester && authResult.requester.userCode,
+          actorRole: authResult.requester && authResult.requester.role,
+          message: roleResult.message,
+          metadata: { stage: "requireRole" }
+        });
       }
 
       if (action === "getSchools") {
@@ -81,10 +210,18 @@ function doPost(e) {
       } else if (action === "getDashboardStats") {
         result = getDashboardStats(data);
       }
+      return auditAndRespond(result, {
+        actorUserCode: authResult.requester && authResult.requester.userCode,
+        actorRole: authResult.requester && authResult.requester.role
+      });
     } else if (action === "getSubmissionStatus") {
       const authResult = requireAuth(data);
       if (!authResult.success) {
-        return jsonResponse(authResult);
+        return auditAndRespond(authResult, {
+          status: "DENIED",
+          message: authResult.message,
+          metadata: { stage: "requireAuth" }
+        });
       }
 
       const requesterRole = authResult.requester.role;
@@ -92,49 +229,108 @@ function doPost(e) {
         ? requireRole(authResult, ["school"])
         : requireRole(authResult, ["admin", "staff"]);
       if (!roleResult.success) {
-        return jsonResponse(roleResult);
+        return auditAndRespond(roleResult, {
+          status: "DENIED",
+          actorUserCode: authResult.requester && authResult.requester.userCode,
+          actorRole: authResult.requester && authResult.requester.role,
+          message: roleResult.message,
+          metadata: { stage: "requireRole" }
+        });
       }
 
       result = getSubmissionStatus(data, authResult.requester);
+      return auditAndRespond(result, {
+        actorUserCode: authResult.requester && authResult.requester.userCode,
+        actorRole: authResult.requester && authResult.requester.role
+      });
     } else if (action === "uploadSubmission") {
       const authResult = requireAuth(data);
       if (!authResult.success) {
-        return jsonResponse(authResult);
+        return auditAndRespond(authResult, {
+          status: "DENIED",
+          message: authResult.message,
+          metadata: { stage: "requireAuth" }
+        });
       }
 
       const roleResult = requireRole(authResult, ["school"]);
       if (!roleResult.success) {
-        return jsonResponse(roleResult);
+        return auditAndRespond(roleResult, {
+          status: "DENIED",
+          actorUserCode: authResult.requester && authResult.requester.userCode,
+          actorRole: authResult.requester && authResult.requester.role,
+          message: roleResult.message,
+          metadata: { stage: "requireRole" }
+        });
       }
 
       result = uploadSubmission(data, authResult.requester);
+      return auditAndRespond(result, {
+        actorUserCode: authResult.requester && authResult.requester.userCode,
+        actorRole: authResult.requester && authResult.requester.role
+      });
     } else if (action === "getSubmissionDetail") {
       const authResult = requireAuth(data);
       if (!authResult.success) {
-        return jsonResponse(authResult);
+        return auditAndRespond(authResult, {
+          status: "DENIED",
+          message: authResult.message,
+          metadata: { stage: "requireAuth" }
+        });
       }
 
       const roleResult = requireRole(authResult, ["admin", "staff", "school"]);
       if (!roleResult.success) {
-        return jsonResponse(roleResult);
+        return auditAndRespond(roleResult, {
+          status: "DENIED",
+          actorUserCode: authResult.requester && authResult.requester.userCode,
+          actorRole: authResult.requester && authResult.requester.role,
+          message: roleResult.message,
+          metadata: { stage: "requireRole" }
+        });
       }
 
       result = getSubmissionDetail(data, authResult.requester);
+      return auditAndRespond(result, {
+        actorUserCode: authResult.requester && authResult.requester.userCode,
+        actorRole: authResult.requester && authResult.requester.role
+      });
     } else {
       result = {
         success: false,
         message: "ไม่พบ action ที่ระบุ"
       };
+      return auditAndRespond(result, {
+        status: "DENIED",
+        message: result.message,
+        metadata: { stage: "unknown_action" }
+      });
     }
 
-    return jsonResponse(result);
+    return auditAndRespond(result);
 
   } catch (error) {
-    return jsonResponse({
+    const errorResult = {
       success: false,
       message: "เกิดข้อผิดพลาดในระบบ",
       error: error.toString()
-    });
+    };
+
+    safeAuditLog(buildAuditPayload({
+      requestId: requestId,
+      action: action,
+      status: "ERROR",
+      actorUserCode: String((data && (data.requesterUserCode || data.username || data.userCode)) || "").trim() || null,
+      actorRole: String((data && data.requesterRole) || "").trim().toLowerCase() || null,
+      message: errorResult.message,
+      errorCode: "SERVER_EXCEPTION",
+      metadata: {
+        stage: "doPost.catch",
+        errorMessage: error && error.message ? String(error.message) : String(error)
+      }
+    }));
+
+    return jsonResponse(errorResult);
   }
 }
 

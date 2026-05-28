@@ -1,5 +1,16 @@
+# Dependencies
 node_modules/
+
+# macOS
 .DS_Store
+
+# Environment files
 .env
 .env.local
+
+# Logs
 *.log
+
+# Google Apps Script / clasp
+curriculum-submit-gas/
+.clasp.json

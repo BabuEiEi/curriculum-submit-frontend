@@ -1,0 +1,26 @@
+:root {
+    --bg-soft: #f1f5f9;
+    --left-top: #f8fafc;
+    --left-bottom: #e2e8f0;
+}
+
+body {
+    font-family: "Sarabun", "Noto Sans Thai", Tahoma, sans-serif;
+    background-color: var(--bg-soft);
+}
+
+.left-panel {
+    background: linear-gradient(160deg, var(--left-top) 0%, var(--left-bottom) 100%);
+}
+
+#alert-box {
+    color: #334155;
+}
+
+#alert-box.success {
+    color: #166534;
+}
+
+#alert-box.error {
+    color: #b91c1c;
+}

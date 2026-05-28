@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ระบบส่งหลักสูตรสถานศึกษา 68 ปีการศึกษา 2569 - Login</title>
+    <link rel="stylesheet" href="css/tailwind.css" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="min-h-screen bg-slate-100 text-slate-800">
+    <main class="min-h-screen flex flex-col md:flex-row">
+      <section class="relative md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-between left-panel">
+        <div>
+          <div class="flex items-center gap-4 mb-8">
+            <div
+              class="h-14 w-14 rounded-xl bg-slate-700 text-white flex items-center justify-center text-xl font-bold shadow-sm"
+              aria-label="Logo"
+            >
+              CS
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Curriculum Submit</p>
+              <p class="text-sm text-slate-600">School Administration</p>
+            </div>
+          </div>
+
+          <h1 class="text-2xl md:text-3xl font-bold leading-tight text-slate-900">
+            ระบบส่งงานหลักสูตรสถานศึกษา 68 <br>ปีการศึกษา 2569
+          </h1>
+          <p class="mt-4 text-slate-700 leading-relaxed max-w-md">
+            ระบบสำหรับส่งเอกสาร ติดตามสถานะ และจัดการงานหลักสูตรอย่างเป็นระเบียบในที่เดียว
+          </p>
+        </div>
+
+        <footer class="mt-10 text-sm text-slate-600">สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน<br>กระทรวงศึกษาธิการ</footer>
+      </section>
+
+      <section class="md:w-1/2 p-6 sm:p-10 md:p-12 lg:p-16 flex items-center justify-center">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+          <h2 class="text-xl font-semibold text-slate-900">เข้าสู่ระบบ</h2>
+          <p class="mt-2 text-sm text-slate-600">กรอกข้อมูลเพื่อเข้าสู่ระบบส่งงานหลักสูตรสถานศึกษา</p>
+
+          <form id="login-form" class="mt-6 space-y-4" novalidate>
+            <div>
+              <label for="username" class="block text-sm font-medium text-slate-700 mb-1">รหัสประจำตัว</label>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                autocomplete="username"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
+                placeholder="เช่น scxxxxx"
+                required
+              />
+            </div>
+
+            <div>
+              <label for="password" class="block text-sm font-medium text-slate-700 mb-1">รหัสผ่าน</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
+                placeholder="กรอกรหัสผ่าน"
+                required
+              />
+            </div>
+
+            <button
+              id="login-btn"
+              type="submit"
+              class="w-full rounded-lg bg-slate-700 text-white py-2.5 text-sm font-medium hover:bg-slate-800 transition-colors"
+            >
+              เข้าสู่ระบบ
+            </button>
+
+            <div id="alert-box" class="text-sm min-h-5"></div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+  </body>
+</html>

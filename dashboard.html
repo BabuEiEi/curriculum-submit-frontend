@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - ระบบส่งหลักสูตรสถานศึกษา</title>
+    <link rel="stylesheet" href="css/tailwind.css" />
+    <style>
+      :root {
+        --sidebar-expanded: 260px;
+        --sidebar-collapsed: 88px;
+      }
+
+      body {
+        font-family: "Sarabun", "Noto Sans Thai", Tahoma, sans-serif;
+        background: radial-gradient(circle at 10% 10%, #e2e8f0 0%, #f8fafc 45%, #ffffff 100%);
+      }
+
+      .app-shell {
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        width: var(--sidebar-expanded);
+        transition: width 0.25s ease;
+      }
+
+      .sidebar.is-collapsed {
+        width: var(--sidebar-collapsed);
+      }
+
+      .sidebar.is-collapsed .label,
+      .sidebar.is-collapsed .brand-copy,
+      .sidebar.is-collapsed .profile-text,
+      .sidebar.is-collapsed .footer-text {
+        display: none;
+      }
+
+      .sidebar.is-collapsed .menu-item {
+        justify-content: center;
+      }
+
+      .sidebar.is-collapsed .menu-item .icon {
+        margin-right: 0;
+      }
+
+      .content-area {
+        min-height: 100vh;
+      }
+
+      .menu-item.active {
+        background-color: #e2e8f0;
+        color: #0f172a;
+      }
+    </style>
+  </head>
+  <body class="text-slate-800">
+    <div class="app-shell flex">
+      <aside id="sidebar" class="sidebar bg-slate-900 text-slate-100 flex flex-col">
+        <div class="p-4 border-b border-slate-700 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <div class="h-10 w-10 rounded-xl bg-slate-700 flex items-center justify-center font-bold">CS</div>
+            <div class="brand-copy overflow-hidden">
+              <p class="text-[11px] uppercase tracking-[0.2em] text-slate-300 whitespace-nowrap">Curriculum Submit</p>
+              <p class="text-sm font-medium text-slate-100 whitespace-nowrap">Dashboard</p>
+            </div>
+          </div>
+          <button
+            id="toggle-sidebar"
+            type="button"
+            class="h-9 w-9 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors flex items-center justify-center"
+            aria-label="ยุบหรือขยายเมนู"
+          >
+            <span id="toggle-icon">⟨⟨</span>
+          </button>
+        </div>
+
+        <div class="p-4 border-b border-slate-700">
+          <p id="profile-name" class="profile-text text-sm font-semibold text-white truncate">-</p>
+          <p id="profile-role" class="profile-text text-xs text-slate-300 mt-1 truncate">-</p>
+          <p id="profile-school" class="profile-text text-xs text-slate-400 mt-1 truncate">-</p>
+        </div>
+
+        <nav id="menu-list" class="p-3 flex-1 space-y-1"></nav>
+
+        <div class="p-4 border-t border-slate-700">
+          <button
+            id="logout-btn"
+            type="button"
+            class="menu-item w-full rounded-lg bg-rose-600 hover:bg-rose-700 transition-colors text-sm font-medium px-3 py-2.5 flex items-center"
+          >
+            <span class="icon mr-2">⎋</span>
+            <span class="label">Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      <main class="content-area flex-1 flex flex-col">
+        <header class="px-6 py-5 border-b border-slate-200 bg-white/70 backdrop-blur-sm">
+          <h1 class="text-xl md:text-2xl font-bold text-slate-900">ระบบส่งงานหลักสูตรสถานศึกษา 68 ปีการศึกษา 2569</h1>
+          <p class="text-sm text-slate-600 mt-1">ยินดีต้อนรับเข้าสู่ระบบจัดการข้อมูลหลักสูตร</p>
+        </header>
+
+        <section class="flex-1 p-6 md:p-8">
+          <div id="page-content"></div>
+        </section>
+
+        <footer class="px-6 py-5 border-t border-slate-200 bg-white text-sm text-slate-600">
+          สำนักงานคณะกรรมการการศึกษาขั้นพื้นฐาน
+          <br />
+          กระทรวงศึกษาธิการ
+        </footer>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/dashboard.js"></script>
+  </body>
+</html>

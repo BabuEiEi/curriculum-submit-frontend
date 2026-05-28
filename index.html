@@ -10,14 +10,22 @@
   <body class="min-h-screen bg-slate-100 text-slate-800">
     <main class="min-h-screen flex flex-col md:flex-row">
       <section class="relative md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-between left-panel">
+        <!-- Decorative background circles -->
+        <svg class="deco-circles" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="72" cy="72" r="68" />
+          <circle cx="72" cy="72" r="110" />
+          <circle cx="72" cy="72" r="155" />
+          <circle cx="300" cy="-20" r="90" />
+          <circle cx="300" cy="-20" r="138" />
+        </svg>
         <div>
           <div class="flex items-center gap-4 mb-8">
-            <div
-              class="h-14 w-14 rounded-xl bg-slate-700 text-white flex items-center justify-center text-xl font-bold shadow-sm"
-              aria-label="Logo"
-            >
-              CS
-            </div>
+            <img
+              src="https://cdn.jsdelivr.net/gh/BabuEiEi/images/สพฐ.02 ไม่มีขอบ.png"
+              alt="โลโก้ สพฐ."
+              class="h-14 w-14 object-contain"
+              loading="eager"
+            />
             <div>
               <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Curriculum Submit</p>
               <p class="text-sm text-slate-600">School Administration</p>
@@ -67,6 +75,16 @@
               />
             </div>
 
+            <div class="text-right">
+              <button
+                id="search-credential-btn"
+                type="button"
+                class="inline-flex items-center text-sm font-medium text-blue-700 hover:text-blue-800 hover:underline"
+              >
+                ค้นหารหัสประจำตัว / รหัสผ่าน
+              </button>
+            </div>
+
             <button
               id="login-btn"
               type="submit"
@@ -80,6 +98,32 @@
         </div>
       </section>
     </main>
+
+    <div id="credential-modal" class="credential-modal hidden" aria-hidden="true">
+      <div class="credential-modal__backdrop" data-close-credential-modal></div>
+      <div class="credential-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="credential-modal-title">
+        <div class="credential-modal__header">
+          <h3 id="credential-modal-title" class="text-lg font-semibold text-slate-900">ค้นหารหัสประจำตัว / รหัสผ่าน</h3>
+          <button type="button" class="credential-modal__close" aria-label="ปิด" data-close-credential-modal>ปิด</button>
+        </div>
+
+        <div class="credential-modal__body">
+          <label for="credential-keyword" class="block text-sm font-medium text-slate-700 mb-1">คำค้นหา</label>
+          <div class="credential-modal__search-row">
+            <input
+              id="credential-keyword"
+              type="text"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
+              placeholder="กรอกชื่อโรงเรียน รหัสโรงเรียน หรืออีเมล"
+            />
+            <button id="credential-search-btn" type="button" class="credential-modal__search-btn">ค้นหา</button>
+          </div>
+
+          <p id="credential-modal-message" class="credential-modal__message text-sm text-slate-600"></p>
+          <div id="credential-results" class="credential-modal__results"></div>
+        </div>
+      </div>
+    </div>
 
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>

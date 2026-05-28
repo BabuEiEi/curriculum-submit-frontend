@@ -1571,12 +1571,16 @@ function renderSubmissionDetailContent() {
   }
 
   const badgeClass = getSubmissionOverallBadgeClass(submissionDetailData.overallStatus);
+  const requesterRole = normalizeRole(currentUser && currentUser.role);
+  const resolvedSchoolName = requesterRole === "school"
+    ? (currentUser && (currentUser.school || currentUser.name) ? (currentUser.school || currentUser.name) : submissionDetailData.schoolName)
+    : submissionDetailData.schoolName;
   return `
     <div class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
         <div>
           <p class="text-slate-500">ชื่อโรงเรียน</p>
-          <p class="font-medium text-slate-800">${escapeHtml(submissionDetailData.schoolName || "-")}</p>
+          <p class="font-medium text-slate-800">${escapeHtml(resolvedSchoolName || "-")}</p>
         </div>
         <div>
           <p class="text-slate-500">สถานะรวม</p>

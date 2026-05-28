@@ -925,6 +925,18 @@ function getSubmissionDetail(data, requester) {
   const lowerFileUrl = row.lower_file || null;
   const upperFileUrl = row.upper_file || null;
 
+  // Prefer canonical school name from users table to avoid stale/mis-mapped value in submissions.
+  let resolvedSchoolName = String(row.school_name || "").trim();
+  const userRows = callSupabase(
+    "users?select=name,school_name&user_code=eq."
+    + encodeURIComponent(userCode)
+    + "&limit=1"
+  );
+  if (Array.isArray(userRows) && userRows.length > 0) {
+    const userRow = userRows[0] || {};
+    resolvedSchoolName = String(userRow.school_name || userRow.name || resolvedSchoolName || "").trim();
+  }
+
   const sentCount = [earlyFileUrl, lowerFileUrl, upperFileUrl].filter(Boolean).length;
   let overallStatus = "ยังไม่ส่ง";
   if (sentCount === 3) {
@@ -936,7 +948,7 @@ function getSubmissionDetail(data, requester) {
   return {
     success: true,
     data: {
-      schoolName: row.school_name || "",
+      schoolName: resolvedSchoolName,
       overallStatus: overallStatus,
       uploadedAt: row.submitted_at || null,
       updatedAt: row.updated_at || null,

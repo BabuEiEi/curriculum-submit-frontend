@@ -3194,6 +3194,10 @@ function setupSidebarToggle() {
   const sidebar = document.getElementById("sidebar");
   const toggleButton = document.getElementById("toggle-sidebar");
 
+  if (!sidebar || !toggleButton) {
+    return;
+  }
+
   let isCollapsed = false;
   setSidebarToggleIcon(isCollapsed);
 
@@ -3201,6 +3205,63 @@ function setupSidebarToggle() {
     isCollapsed = !isCollapsed;
     sidebar.classList.toggle("is-collapsed", isCollapsed);
     setSidebarToggleIcon(isCollapsed);
+  });
+}
+
+function setupMobileSidebar() {
+  const sidebar = document.getElementById("sidebar");
+  const openButton = document.getElementById("mobile-menu-open");
+  const overlay = document.getElementById("mobile-sidebar-overlay");
+  const menuList = document.getElementById("menu-list");
+
+  if (!sidebar || !openButton || !overlay) {
+    return;
+  }
+
+  const mobileQuery = window.matchMedia("(max-width: 1024px)");
+
+  function closeMobileSidebar() {
+    sidebar.classList.remove("is-mobile-open");
+    overlay.classList.remove("is-visible");
+    document.body.classList.remove("mobile-nav-open");
+  }
+
+  function openMobileSidebar() {
+    if (!mobileQuery.matches) {
+      return;
+    }
+
+    sidebar.classList.add("is-mobile-open");
+    overlay.classList.add("is-visible");
+    document.body.classList.add("mobile-nav-open");
+  }
+
+  openButton.addEventListener("click", openMobileSidebar);
+  overlay.addEventListener("click", closeMobileSidebar);
+
+  if (menuList) {
+    menuList.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!mobileQuery.matches || !(target instanceof Element)) {
+        return;
+      }
+
+      if (target.closest("button[data-page]")) {
+        closeMobileSidebar();
+      }
+    });
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMobileSidebar();
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    if (!mobileQuery.matches) {
+      closeMobileSidebar();
+    }
   });
 }
 
@@ -3226,6 +3287,7 @@ function initDashboard() {
   renderMenu(user.role);
   navigateToPage(currentPage);
   setupSidebarToggle();
+  setupMobileSidebar();
   renderLucideIcons();
   setupLogout();
 }

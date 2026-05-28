@@ -22,7 +22,12 @@
 
       .sidebar {
         width: var(--sidebar-expanded);
-        transition: width 0.25s ease;
+        opacity: 1;
+        transition:
+          width 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+          opacity 0.2s ease;
+        will-change: transform, width, opacity;
       }
 
       .sidebar.is-collapsed {
@@ -70,6 +75,164 @@
       .menu-item.active {
         background-color: #e2e8f0;
         color: #0f172a;
+      }
+
+      #mobile-menu-open,
+      #mobile-sidebar-overlay {
+        display: none;
+      }
+
+      @media (max-width: 1024px) {
+        .app-shell {
+          position: relative;
+        }
+
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          width: min(82vw, 320px) !important;
+          max-width: 320px;
+          z-index: 50;
+          transform: translateX(-100%);
+          opacity: 0.98;
+          box-shadow: 0 12px 30px rgba(15, 23, 42, 0.28);
+          overflow-y: auto;
+        }
+
+        .sidebar.is-mobile-open {
+          transform: translateX(0);
+          opacity: 1;
+        }
+
+        #mobile-menu-open {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        #mobile-sidebar-overlay {
+          display: block;
+          position: fixed;
+          inset: 0;
+          background: rgba(2, 6, 23, 0.35);
+          z-index: 45;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.28s ease;
+        }
+
+        #mobile-sidebar-overlay.is-visible {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        body.mobile-nav-open {
+          overflow: hidden;
+        }
+
+        #toggle-sidebar {
+          display: none;
+        }
+
+        .content-area {
+          min-height: auto;
+        }
+
+        .sidebar.is-collapsed {
+          width: min(82vw, 320px) !important;
+        }
+
+        .sidebar.is-collapsed .label,
+        .sidebar.is-collapsed .brand-copy,
+        .sidebar.is-collapsed .profile-text,
+        .sidebar.is-collapsed .footer-text {
+          display: block;
+        }
+
+        .sidebar.is-collapsed .menu-item {
+          justify-content: flex-start;
+          gap: 0.75rem;
+        }
+      }
+
+      @supports (padding: max(0px)) {
+        @media (max-width: 1024px) {
+          .sidebar {
+            padding-top: max(0px, env(safe-area-inset-top));
+            padding-bottom: max(0px, env(safe-area-inset-bottom));
+          }
+
+          #mobile-menu-open {
+            top: max(0.75rem, env(safe-area-inset-top));
+            left: max(0.75rem, env(safe-area-inset-left));
+          }
+
+          .content-area {
+            padding-bottom: max(0px, env(safe-area-inset-bottom));
+          }
+        }
+      }
+
+      @media (max-width: 640px) {
+        header {
+          padding: 1rem;
+        }
+
+        section {
+          padding: 1rem;
+        }
+
+        footer {
+          padding: 1rem;
+        }
+      }
+
+      @media (max-width: 360px) {
+        header h1 {
+          font-size: 1.05rem;
+          line-height: 1.35;
+        }
+
+        header p {
+          font-size: 0.78rem;
+        }
+
+        .brand-copy p:first-child {
+          font-size: 10px;
+        }
+
+        .brand-copy p:last-child {
+          font-size: 0.78rem;
+        }
+
+        .menu-item {
+          font-size: 0.8rem;
+        }
+      }
+
+      @media (min-width: 2560px) {
+        :root {
+          --sidebar-expanded: 320px;
+          --sidebar-collapsed: 104px;
+        }
+
+        body {
+          font-size: 20px;
+        }
+
+        header h1 {
+          font-size: 2.4rem;
+        }
+
+        header p {
+          font-size: 1.15rem;
+        }
+
+        .menu-item {
+          font-size: 1.05rem;
+        }
       }
     </style>
   </head>
@@ -121,6 +284,17 @@
           </button>
         </div>
       </aside>
+
+      <button
+        id="mobile-menu-open"
+        type="button"
+        class="fixed top-4 left-4 z-40 h-11 w-11 rounded-xl bg-slate-900 text-white shadow-lg"
+        aria-label="เปิดเมนู"
+        title="เปิดเมนู"
+      >
+        <span aria-hidden="true">☰</span>
+      </button>
+      <div id="mobile-sidebar-overlay" aria-hidden="true"></div>
 
       <main class="content-area flex-1 flex flex-col">
         <header class="px-6 py-5 border-b border-slate-200 bg-white/70 backdrop-blur-sm">

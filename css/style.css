@@ -9,6 +9,13 @@ body {
     background-color: var(--bg-soft);
 }
 
+@supports (padding: max(0px)) {
+    body {
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+    }
+}
+
 .left-panel {
     background: linear-gradient(160deg, var(--left-top) 0%, var(--left-bottom) 100%);
 }
@@ -193,6 +200,36 @@ body {
 }
 
 @media (max-width: 640px) {
+    @supports (padding: max(0px)) {
+        body {
+            padding-top: max(0px, env(safe-area-inset-top));
+            padding-bottom: max(0px, env(safe-area-inset-bottom));
+        }
+
+        .credential-modal {
+            padding-top: max(0.5rem, env(safe-area-inset-top));
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+            padding-left: max(0.5rem, env(safe-area-inset-left));
+            padding-right: max(0.5rem, env(safe-area-inset-right));
+        }
+    }
+
+    .left-panel {
+        min-height: 44vh;
+    }
+
+    .left-panel>div {
+        max-width: 100%;
+    }
+
+    .deco-circles circle {
+        opacity: 0.2;
+    }
+
+    #login-form {
+        margin-top: 1rem;
+    }
+
     .credential-modal {
         padding: 0.5rem;
     }
@@ -203,5 +240,58 @@ body {
 
     .credential-modal__search-btn {
         width: 100%;
+    }
+}
+
+@media (max-width: 360px) {
+    .left-panel h1 {
+        font-size: 1.35rem;
+        line-height: 1.35;
+    }
+
+    .left-panel p {
+        font-size: 0.92rem;
+    }
+
+    .left-panel p.text-blue-600 {
+        font-size: 1.02rem;
+    }
+
+    #login-form label,
+    #login-form input,
+    #login-btn,
+    #search-credential-btn {
+        font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 2560px) {
+    .left-panel h1 {
+        font-size: 4rem;
+        line-height: 1.12;
+    }
+
+    .left-panel p {
+        font-size: 1.35rem;
+    }
+
+    .left-panel p.text-blue-600 {
+        font-size: 1.8rem;
+    }
+
+    .left-panel footer {
+        font-size: 1.05rem;
+    }
+
+    main>section:nth-child(2) .max-w-md {
+        max-width: 38rem;
+        padding: 2.4rem;
+    }
+
+    #login-form label,
+    #login-form input,
+    #login-btn,
+    #search-credential-btn {
+        font-size: 1.05rem;
     }
 }
